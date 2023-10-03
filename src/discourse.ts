@@ -266,7 +266,7 @@ export class DiscourseApi extends EventEmitter {
           format: 'pem',
         },
         privateKeyEncoding: {
-          type: 'pkcs8',
+          type: 'pkcs1',
           format: 'pem',
         },
       });
@@ -297,6 +297,36 @@ export class DiscourseApi extends EventEmitter {
    */
   async generateUserApiKey(params?: generateUserApiKeyParams) {
     return this.generateUserApiKeySync(params);
+  }
+
+  /**
+   * Decrypt the encrypted user_api_key from discourse
+   * @param private_key your private_key
+   * @param encrypted The encrypted user_api_key
+   * @returns 
+   */
+  decryptUserApiKey(private_key:string, encrypted:string): {
+    /**
+     * The user api key
+     */
+    key: string,
+    /**
+     * The nonce provided when generating user_api_key
+     */
+    nonce: string,
+    push: boolean,
+    /**
+     * Api version
+     */
+    api: string | number,
+  } {
+    return JSON.parse(crypto.privateDecrypt(
+      {
+        key: private_key,
+        padding: crypto.constants.RSA_PKCS1_PADDING
+      },
+      Buffer.from(encrypted, 'base64')
+    ).toString());
   }
 
   /**
