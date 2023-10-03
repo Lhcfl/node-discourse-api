@@ -1,0 +1,44 @@
+{
+  "name": "node-discourse-api",
+  "version": "0.0.1",
+  "description": "A node api for discourse",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "pretty": "prettier -c .",
+    "pretty:fix": "prettier -w . && eslint . --fix --ext .ts,.js",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --fix --ext .ts,.js",
+    "doc:generate": "typedoc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lhcfl/node-discourse-api.git"
+  },
+  "author": "Lhcfl <lhcfl@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Lhcfl/node-discourse-api/issues"
+  },
+  "homepage": "https://github.com/Lhcfl/node-discourse-api#readme",
+  "dependencies": {
+    "eventemitter3": "^5.0.1",
+    "node-fetch-commonjs": "^3.3.2",
+    "node-rsa": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.9",
+    "@types/node-rsa": "^1.1.2",
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "husky": "^8.0.3",
+    "prettier": "^3.0.3",
+    "ts-node": "^10.9.1",
+    "tsc-alias": "^1.8.7",
+    "typedoc": "^0.25.1",
+    "typescript": "^5.2.2"
+  }
+}

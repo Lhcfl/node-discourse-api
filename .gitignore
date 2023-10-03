@@ -1,0 +1,5 @@
+node_modules/
+pnpm-lock.yaml
+# 构建产物
+dist
+docs/
