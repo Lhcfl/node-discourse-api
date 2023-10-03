@@ -1,8 +1,8 @@
-import EventEmitter from 'eventemitter3';
-import { ApiOptions, Post, generateUserApiKeyParams } from '@/types/discourse';
-import fetch, { HeadersInit } from 'node-fetch-commonjs';
-import { ChatApi } from '@/lib/chat';
-import crypto from 'node:crypto';
+import EventEmitter from "eventemitter3";
+import { ApiOptions, Post, generateUserApiKeyParams } from "@/types/discourse";
+import fetch, { HeadersInit } from "node-fetch-commonjs";
+import { ChatApi } from "@/lib/chat";
+import crypto from "node:crypto";
 
 export class DiscourseApiOption {
   private _storage: ApiOptions;
@@ -13,7 +13,7 @@ export class DiscourseApiOption {
       (this.api_key || this.api_username) &&
       (this.user_api_key || this.user_api_client_id)
     ) {
-      throw 'You cannot specify api_key and user_api_key at the same time';
+      throw "You cannot specify api_key and user_api_key at the same time";
     }
   }
 
@@ -100,19 +100,19 @@ export class DiscourseApi extends EventEmitter {
    */
   get _defaultHeaders(): HeadersInit {
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
     if (this.options.api_key) {
-      headers['Api-Key'] = this.options.api_key;
+      headers["Api-Key"] = this.options.api_key;
     }
     if (this.options.api_username) {
-      headers['Api-Username'] = this.options.api_username;
+      headers["Api-Username"] = this.options.api_username;
     }
     if (this.options.user_api_key) {
-      headers['User-Api-Key'] = this.options.user_api_key;
+      headers["User-Api-Key"] = this.options.user_api_key;
     }
     if (this.options.user_api_client_id) {
-      headers['User-Api-Client-Id'] = this.options.user_api_client_id;
+      headers["User-Api-Client-Id"] = this.options.user_api_client_id;
     }
     return headers;
   }
@@ -126,7 +126,7 @@ export class DiscourseApi extends EventEmitter {
    */
   _request(
     endpoint: string,
-    method: 'GET' | 'POST' | 'DELETE' | 'PUT' = 'GET',
+    method: "GET" | "POST" | "DELETE" | "PUT" = "GET",
     data?: unknown,
     options?: {
       /**
@@ -148,11 +148,11 @@ export class DiscourseApi extends EventEmitter {
       if (data) {
         data = JSON.stringify(data);
       }
-      if (endpoint.startsWith('/')) {
-        const [p1, p2] = endpoint.split('?');
-        let urlType = '';
-        if (!p1.endsWith('.json') && !options?.doNotSendJSON) {
-          urlType = '.json';
+      if (endpoint.startsWith("/")) {
+        const [p1, p2] = endpoint.split("?");
+        let urlType = "";
+        if (!p1.endsWith(".json") && !options?.doNotSendJSON) {
+          urlType = ".json";
         }
         if (p2) {
           endpoint = `${this.url}${p1}${urlType}?${p2}`;
@@ -216,44 +216,44 @@ export class DiscourseApi extends EventEmitter {
       private_key?: string;
       nonce: string;
     } = {
-      url: '',
-      nonce: crypto.randomBytes(16).toString('hex'),
+      url: "",
+      nonce: crypto.randomBytes(16).toString("hex"),
     };
     if (!params) {
       params = {};
     }
     urlParams.set(
-      'application_name',
-      params.application_name || 'NodeDiscourseApi',
+      "application_name",
+      params.application_name || "NodeDiscourseApi",
     );
-    urlParams.set('scopes', params.scopes || 'read');
-    urlParams.set('client_id', params.client_id || 'NodeDiscourseApi');
+    urlParams.set("scopes", params.scopes || "read");
+    urlParams.set("client_id", params.client_id || "NodeDiscourseApi");
     if (!params.public_key) {
-      const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+      const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
         modulusLength: 2048,
         publicKeyEncoding: {
-          type: 'pkcs1',
-          format: 'pem',
+          type: "pkcs1",
+          format: "pem",
         },
         privateKeyEncoding: {
-          type: 'pkcs1',
-          format: 'pem',
+          type: "pkcs1",
+          format: "pem",
         },
       });
-      urlParams.set('public_key', publicKey);
+      urlParams.set("public_key", publicKey);
       res.private_key = privateKey;
       res.public_key = publicKey;
     } else {
-      urlParams.set('public_key', params.public_key);
+      urlParams.set("public_key", params.public_key);
     }
 
     if (params.auth_redirect) {
-      urlParams.set('auth_redirect', params.auth_redirect);
+      urlParams.set("auth_redirect", params.auth_redirect);
     }
     if (params.push_url) {
-      urlParams.set('push_url', params.push_url);
+      urlParams.set("push_url", params.push_url);
     }
-    urlParams.set('nonce', res.nonce);
+    urlParams.set("nonce", res.nonce);
     res.url = `${this.url}/user-api-key/new?${urlParams.toString()}`;
     return res;
   }
@@ -300,7 +300,7 @@ export class DiscourseApi extends EventEmitter {
             key: private_key,
             padding: crypto.constants.RSA_PKCS1_PADDING,
           },
-          Buffer.from(encrypted, 'base64'),
+          Buffer.from(encrypted, "base64"),
         )
         .toString(),
     );
@@ -315,11 +315,11 @@ export class DiscourseApi extends EventEmitter {
       user_api_key = this.options.user_api_key;
     }
     if (!user_api_key) {
-      throw 'No user api key to revoke';
+      throw "No user api key to revoke";
     }
-    return this._request('/user-api-key/revoke', 'POST', undefined, {
+    return this._request("/user-api-key/revoke", "POST", undefined, {
       headers: {
-        'User-Api-Key': user_api_key,
+        "User-Api-Key": user_api_key,
       },
       overrideHeaders: true,
     });
@@ -331,7 +331,7 @@ export class DiscourseApi extends EventEmitter {
    * See https://docs.discourse.org/#tag/Site/operation/getSite
    */
   getSite() {
-    return this._request('/site');
+    return this._request("/site");
   }
 
   /**
@@ -342,7 +342,7 @@ export class DiscourseApi extends EventEmitter {
   listPosts(): Promise<{
     latest_posts: Post[];
   }> {
-    return this._request('/posts');
+    return this._request("/posts");
   }
 
   /**
@@ -375,7 +375,7 @@ export class DiscourseApi extends EventEmitter {
     /**
      * Required for new private message.
      */
-    archetype?: 'private_message' | string;
+    archetype?: "private_message" | string;
     /**
      * Datestring for created at
      */
@@ -393,7 +393,7 @@ export class DiscourseApi extends EventEmitter {
      */
     external_id?: string;
   }): Promise<Post> {
-    return this._request('/posts', 'POST', payloads);
+    return this._request("/posts", "POST", payloads);
   }
 
   /**
@@ -423,7 +423,7 @@ export class DiscourseApi extends EventEmitter {
       edit_reason?: string;
     },
   ): Promise<Post> {
-    return this._request(`/posts/${id}`, 'PUT', post);
+    return this._request(`/posts/${id}`, "PUT", post);
   }
 
   /**
@@ -436,7 +436,7 @@ export class DiscourseApi extends EventEmitter {
    *
    */
   deletePost(id: number | string, permanently: boolean = false) {
-    return this._request(`/posts/${id}`, 'DELETE', {
+    return this._request(`/posts/${id}`, "DELETE", {
       force_destory: permanently,
     });
   }

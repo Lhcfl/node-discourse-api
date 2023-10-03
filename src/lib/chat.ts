@@ -1,5 +1,5 @@
-import { DiscourseApi } from '@/discourse';
-import { Uploads } from '@/types/discourse';
+import { DiscourseApi } from "@/discourse";
+import { Uploads } from "@/types/discourse";
 
 export type ChatMessageOptions = {
   /**
@@ -43,7 +43,7 @@ export class ChatApi {
     if (options?.in_reply_to_id) {
       data.in_reply_to_id = options.in_reply_to_id;
     }
-    return this.api._request(`/chat/${channelId}`, 'POST', data);
+    return this.api._request(`/chat/${channelId}`, "POST", data);
   }
 
   /**
@@ -73,7 +73,7 @@ export class ChatApi {
     }
     return this.api._request(
       `/chat/${channelId}/edit/${messageId}`,
-      'PUT',
+      "PUT",
       data,
     );
   }
@@ -87,7 +87,7 @@ export class ChatApi {
   deleteMessage(channelId: number, messageId: number) {
     return this.api._request(
       `/chat/api/channels/${channelId}/messages/${messageId}`,
-      'DELETE',
+      "DELETE",
     );
   }
 }
