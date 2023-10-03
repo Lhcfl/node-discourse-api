@@ -5,18 +5,17 @@ export type ChatMessageOptions = {
   /**
    * Reply to message id
    */
-  in_reply_to_id?: number
+  in_reply_to_id?: number;
   /**
    * An array of uploads_ids
    */
-  uploads?: Uploads[] | {id: number}[],
-}
+  uploads?: Uploads[] | { id: number }[];
+};
 
 export class ChatApi {
-
   api: DiscourseApi;
 
-  constructor(api : DiscourseApi) {
+  constructor(api: DiscourseApi) {
     this.api = api;
   }
 
@@ -26,10 +25,14 @@ export class ChatApi {
    * @param message message raw text
    * @todo Uploads is currently unavailable
    * @param uploads if set, will bring uploads
-   * @returns 
+   * @returns
    */
-  sendMessage(channelId: number, message: string, options?: ChatMessageOptions) {
-    const data: {[key: string]: unknown} = {
+  sendMessage(
+    channelId: number,
+    message: string,
+    options?: ChatMessageOptions,
+  ) {
+    const data: { [key: string]: unknown } = {
       message,
     };
     if (options?.uploads) {
@@ -49,10 +52,15 @@ export class ChatApi {
    * @param messageId The id of message
    * @param message new message, raw text
    * @param uploads if set, will bring uploads
-   * @returns 
+   * @returns
    */
-  editMessage(channelId: number, messageId: number, message: string, options?: ChatMessageOptions) {
-    const data: {[key: string]: unknown} = {
+  editMessage(
+    channelId: number,
+    messageId: number,
+    message: string,
+    options?: ChatMessageOptions,
+  ) {
+    const data: { [key: string]: unknown } = {
       new_message: message,
     };
     if (options?.uploads) {
@@ -63,17 +71,23 @@ export class ChatApi {
     if (options?.in_reply_to_id) {
       data.in_reply_to_id = options.in_reply_to_id;
     }
-    return this.api._request(`/chat/${channelId}/edit/${messageId}`, 'PUT', data);
+    return this.api._request(
+      `/chat/${channelId}/edit/${messageId}`,
+      'PUT',
+      data,
+    );
   }
 
   /**
    * Delete a message from a channel
    * @param channelId The id of channel
    * @param messageId The id of message to delete
-   * @returns 
+   * @returns
    */
   deleteMessage(channelId: number, messageId: number) {
-    return this.api._request(`/chat/api/channels/${channelId}/messages/${messageId}`, 'DELETE');
+    return this.api._request(
+      `/chat/api/channels/${channelId}/messages/${messageId}`,
+      'DELETE',
+    );
   }
-
 }
