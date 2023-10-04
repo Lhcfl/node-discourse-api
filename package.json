@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "A node api for discourse",
   "main": "index.js",
+  "files": ["index.js", "lib/**/*"],
   "scripts": {
+    "prepublishOnly": "tsc && tsc-alias",
     "build": "tsc && tsc-alias",
     "pretty": "prettier -c .",
     "pretty:fix": "prettier -w .",
