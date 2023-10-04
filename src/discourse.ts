@@ -3,6 +3,7 @@ import { ApiOptions, Post, generateUserApiKeyParams } from "@/types/discourse";
 import fetch, { HeadersInit } from "node-fetch-commonjs";
 import { ChatApi } from "@/lib/chat";
 import crypto from "node:crypto";
+import { WebhookReceptor } from "./lib/webhook";
 
 export class DiscourseApiOption {
   private _storage: ApiOptions;
@@ -82,6 +83,10 @@ export class DiscourseApi extends EventEmitter {
    * Chat Api
    */
   chat: ChatApi;
+  /**
+   * Webhook receptor
+   */
+  webhook: WebhookReceptor;
 
   /**
    * Create a api client
@@ -93,6 +98,7 @@ export class DiscourseApi extends EventEmitter {
     this.url = url;
     this.options = new DiscourseApiOption(this, options);
     this.chat = new ChatApi(this);
+    this.webhook = new WebhookReceptor(this);
   }
 
   /**
