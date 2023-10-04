@@ -47,13 +47,13 @@
     // "checkJs": true,                                  /* 在已检查类型的 JavaScript 文件中启用错误报告。 */
     // "maxNodeModuleJsDepth": 1,                        /* 指定用于从 “node_modules” 检查 JavaScript 文件的最大文件夹深度。仅适用于 “allowJs”。 */
     /* 发出 */
-    // "declaration": true,                              /* 从项目的 TypeScript 和 JavaScript 文件生成 .d.ts 文件。 */
+    "declaration": true,                              /* 从项目的 TypeScript 和 JavaScript 文件生成 .d.ts 文件。 */
     // "declarationMap": true,                           /* 为 d.ts 文件创建源映射。 */
     // "emitDeclarationOnly": true,                      /* 仅输出 d.ts 文件，而不输出 JavaScript 文件。 */
     "sourceMap": true /* 为发出的 JavaScript 文件创建源映射文件。 */,
     // "inlineSourceMap": true,                          /* 在发出的 JavaScript 中包括源映射文件。 */
     // "outFile": "./",                                  /* 指定将所有输出捆绑到一个 JavaScript 文件中的文件。如果 “declaration” 为 true，还要指定一个捆绑所有 .d.ts 输出的文件。 */
-    "outDir": "./dist" /* 为所有已发出的文件指定输出文件夹。 */,
+    "outDir": "./lib" /* 为所有已发出的文件指定输出文件夹。 */,
     // "removeComments": true,                           /* 禁用发出注释。 */
     // "noEmit": true,                                   /* 禁用从编译发出文件。 */
     // "importHelpers": true,                            /* 允许每个项目从 tslib 导入帮助程序函数一次，而不是将它们包含在每个文件中。 */

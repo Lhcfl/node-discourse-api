@@ -1,1 +1,1 @@
-module.exports = require("./dist/discourse.js");
+module.exports = require("./lib/discourse.js");
