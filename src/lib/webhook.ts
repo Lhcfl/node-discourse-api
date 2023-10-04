@@ -42,28 +42,52 @@ export class WebhookReceptor {
    * Allow post requests on the specified path
    * @param path
    */
-  registWebhookPath(path: string) {
-    this.app.post(path, (req, res) => {
-      try {
-        const query = req.body;
-        for (const type in query) {
-          if (this.EVENT_DICT[type]) {
-            this.EVENT_DICT[type](query[type], res);
+  registWebhookPath(path: string, method:'POST' | 'GET' = 'POST') {
+    if (method === 'GET') {
+      this.app.get(path, (req, res) => {
+        try {
+          const query = req.body;
+          for (const type in query) {
+            if (this.EVENT_DICT[type]) {
+              this.EVENT_DICT[type](query[type], res);
+            } else {
+              this.EVENT_DICT["default"](query, res);
+            }
+          }
+        } catch (err) {
+          console.log("-------ERROR IN WEBHOOK-------");
+          console.error(err);
+          console.log("-------ERROR IN WEBHOOK-------");
+          if (err instanceof Error) {
+            res.status(500).json({ text: "500 error", details: err.message });
           } else {
-            this.EVENT_DICT["default"](query, res);
+            res.status(500).json({ text: "500 error", details: err });
           }
         }
-      } catch (err) {
-        console.log("-------ERROR IN WEBHOOK-------");
-        console.error(err);
-        console.log("-------ERROR IN WEBHOOK-------");
-        if (err instanceof Error) {
-          res.status(500).json({ text: "500 error", details: err.message });
-        } else {
-          res.status(500).json({ text: "500 error", details: err });
+      });
+    } else {
+      this.app.post(path, (req, res) => {
+        try {
+          const query = req.body;
+          for (const type in query) {
+            if (this.EVENT_DICT[type]) {
+              this.EVENT_DICT[type](query[type], res);
+            } else {
+              this.EVENT_DICT["default"](query, res);
+            }
+          }
+        } catch (err) {
+          console.log("-------ERROR IN WEBHOOK-------");
+          console.error(err);
+          console.log("-------ERROR IN WEBHOOK-------");
+          if (err instanceof Error) {
+            res.status(500).json({ text: "500 error", details: err.message });
+          } else {
+            res.status(500).json({ text: "500 error", details: err });
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   /**
