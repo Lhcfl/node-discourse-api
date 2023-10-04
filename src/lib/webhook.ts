@@ -14,15 +14,26 @@ export type WebhookCallbackFunction = (
  * A simple receiver that receives webhooks sent from discourse
  */
 export class WebhookReceptor {
-  api: DiscourseApi;
-  app = express();
 
-  EVENT_DICT: {
+  private _api: DiscourseApi;
+  private _app = express();
+  private EVENT_DICT: {
     [key in string]: WebhookCallbackFunction;
   };
 
+  /**
+   * The express application used by webhook. You can use it to add unencapsulated custom operations
+   */
+  get app() {
+    return this._app;
+  }
+
+  get api() {
+    return this._api;
+  }
+
   constructor(api: DiscourseApi) {
-    this.api = api;
+    this._api = api;
     this.app.use(bodyParser.urlencoded({ extended: false }));
     this.app.use(bodyParser.json());
 
@@ -42,52 +53,31 @@ export class WebhookReceptor {
    * Allow post requests on the specified path
    * @param path
    */
-  registWebhookPath(path: string, method:'POST' | 'GET' = 'POST') {
-    if (method === 'GET') {
-      this.app.get(path, (req, res) => {
-        try {
-          const query = req.body;
-          for (const type in query) {
-            if (this.EVENT_DICT[type]) {
-              this.EVENT_DICT[type](query[type], res);
-            } else {
-              this.EVENT_DICT["default"](query, res);
-            }
+  registWebhookPath(path: string) {
+    this.app.post(path, (req, res) => {
+      try {
+        const query = req.body;
+        for (const type in query) {
+          if (this.EVENT_DICT["all"]) {
+            this.EVENT_DICT["all"](query, res);
           }
-        } catch (err) {
-          console.log("-------ERROR IN WEBHOOK-------");
-          console.error(err);
-          console.log("-------ERROR IN WEBHOOK-------");
-          if (err instanceof Error) {
-            res.status(500).json({ text: "500 error", details: err.message });
+          if (this.EVENT_DICT[type]) {
+            this.EVENT_DICT[type](query[type], res);
           } else {
-            res.status(500).json({ text: "500 error", details: err });
+            this.EVENT_DICT["default"](query, res);
           }
         }
-      });
-    } else {
-      this.app.post(path, (req, res) => {
-        try {
-          const query = req.body;
-          for (const type in query) {
-            if (this.EVENT_DICT[type]) {
-              this.EVENT_DICT[type](query[type], res);
-            } else {
-              this.EVENT_DICT["default"](query, res);
-            }
-          }
-        } catch (err) {
-          console.log("-------ERROR IN WEBHOOK-------");
-          console.error(err);
-          console.log("-------ERROR IN WEBHOOK-------");
-          if (err instanceof Error) {
-            res.status(500).json({ text: "500 error", details: err.message });
-          } else {
-            res.status(500).json({ text: "500 error", details: err });
-          }
+      } catch (err) {
+        console.log("-------ERROR IN WEBHOOK-------");
+        console.error(err);
+        console.log("-------ERROR IN WEBHOOK-------");
+        if (err instanceof Error) {
+          res.status(500).json({ text: "500 error", details: err.message });
+        } else {
+          res.status(500).json({ text: "500 error", details: err });
         }
-      });
-    }
+      }
+    });
   }
 
   /**
@@ -106,7 +96,21 @@ export class WebhookReceptor {
   }
 
   /**
-   *
+   * It is triggered when discourse sends an webhook event.
+   * 
+   * Example
+   * 
+   * ```
+   * api.webhook.on("post", (post, res) => {
+   *   console.log(post.raw);
+   *   res.json({"text": "200 ok"});
+   * })
+   * ```
+   * 
+   * Specially, the `"default"` event will be triggered when the incoming event *is not* registered in any `on` function.
+   * And the `"all"` event will be triggered in every webhook event.
+   * 
+   * 
    * @param eventName
    * @param callback
    */
