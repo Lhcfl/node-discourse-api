@@ -80,6 +80,18 @@ export class ChatApi {
 
   /**
    * Delete a message from a channel
+   * 
+   * Example:
+   * 
+   * ```
+   * api.chat.deleteMessage(1, 1024).then(() => {
+   *   console.log("Delete successfully");
+   * }).catch((err) => {
+   *   console.log("Delete failed!");
+   *   console.error(err);
+   * });
+   * ```
+   * 
    * @param channelId The id of channel
    * @param messageId The id of message to delete
    * @returns
