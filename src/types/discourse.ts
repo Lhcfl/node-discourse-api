@@ -263,3 +263,10 @@ export interface Topic {
     };
   };
 }
+
+export interface BasicUser {
+  id: number;
+  username: string;
+  name: string | null;
+  avatar_template: string;
+}

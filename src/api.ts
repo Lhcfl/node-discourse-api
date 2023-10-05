@@ -1,5 +1,5 @@
 import EventEmitter from "eventemitter3";
-import { Post, Topic } from "@/types/discourse";
+import { BasicUser, Post, SuggestedTopic, Topic } from "@/types/discourse";
 import fetch, { HeadersInit } from "node-fetch-commonjs";
 import { ChatApi } from "@/lib/chat";
 import crypto from "node:crypto";
@@ -376,6 +376,67 @@ class DiscourseApi extends EventEmitter {
   }
 
   /**
+   * Get the latest topics
+   * @param options
+   * @returns
+   */
+  listLatest(options?: {
+    custom_url?: string;
+    order?:
+      | "default"
+      | "created"
+      | "activity"
+      | "views"
+      | "posts"
+      | "category"
+      | "likes"
+      | "op_likes"
+      | "posters";
+    ascending?: boolean;
+    status?:
+      | "deleted"
+      | "closed"
+      | "listed"
+      | "open"
+      | "public"
+      | "unlisted"
+      | "archived";
+  }): Promise<{
+    topic_list: {
+      more_topics_url?: string;
+      can_create_topic: boolean;
+      per_page: number;
+      topics: SuggestedTopic;
+    };
+    flair_groups?: {
+      id: number;
+      name?: string;
+      flair_url: string;
+      flair_bg_color: string;
+      flair_color: string;
+    };
+    primary_groups: unknown[];
+    users: BasicUser[];
+  }> {
+    const urlParams = new URLSearchParams();
+    if (options?.order) {
+      urlParams.append("order", options.order);
+    }
+    if (options?.ascending) {
+      urlParams.append("order", String(options.ascending));
+    }
+    if (options?.status) {
+      urlParams.append("order", String(options.status));
+    }
+    const queryUrl = options?.custom_url || "/latest";
+    if (urlParams.toString()) {
+      return this._request(`${queryUrl}?${urlParams.toString()}`);
+    } else {
+      return this._request(queryUrl);
+    }
+  }
+
+  /**
    * Get information on a specified topic
    * @param topic_id
    * @param config
@@ -384,7 +445,7 @@ class DiscourseApi extends EventEmitter {
   getTopicInfo(
     topic_id: number | string,
     config?: {
-      arround_post_number: number | "last";
+      arround_post_number?: number | "last";
     },
   ): Promise<Topic> {
     if (config?.arround_post_number) {
