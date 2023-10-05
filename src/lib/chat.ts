@@ -13,10 +13,14 @@ export type ChatMessageOptions = {
 };
 
 export class ChatApi {
-  api: DiscourseApi;
+  private _api: DiscourseApi;
+
+  get api() {
+    return this._api;
+  }
 
   constructor(api: DiscourseApi) {
-    this.api = api;
+    this._api = api;
   }
 
   /**
