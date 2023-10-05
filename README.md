@@ -20,32 +20,92 @@ npm install node-discourse-api
 
 ### Example
 
-#### Create a topic
+#### Start
 
 ```javascript
 const { DiscourseApi } = require("node-discourse-api");
 
-const api = new DiscourseApi("https://discourse.example.con");
+const api = new DiscourseApi("https://discourse.example.com");
 
+// API configured by Discourse administrator. You can also leave it unset and have the API read only the public content of your forum.
 api.options.api_username = "API_USERNAME";
 api.options.api_key = "API_KEY";
+```
 
+#### Create a topic, Post a reply
+
+```javascript
+// Create a new topic, then print it to console
+api
+  .createTopicPostPM({
+    raw: "This is a post from node-discourse-api!!!",
+    title: "Hello world!!!",
+  })
+  .then((post) => {
+    console.log(post);
+  });
+// Post a reply
 api.createTopicPostPM({
-  raw: "This is a post from node-discourse-api!!!",
-  title: "Hello world!!!",
+  raw: "This is a reply post from node-discourse-api!!!",
+  topic_id: 1,
 });
+// Reply to a post
+api.createTopicPostPM({
+  raw: "This is a reply of reply from node-discourse-api!!!",
+  topic_id: 1,
+  reply_to_post_number: 2,
+});
+// Handling errors
+api
+  .createTopicPostPM({
+    raw: "This reply cannot be sent",
+    topic_id: -123,
+  })
+  .catch((err) => {
+    console.log("Catched a error");
+    console.error(err);
+  });
 ```
 
 #### Send a message in channel
 
 ```javascript
+// Send a message in channel 2. Probably, it's #general
+api.chat.sendMessage(2, "hello, world!");
+```
+
+### Generate user api key
+
+```javascript
 const { DiscourseApi } = require("node-discourse-api");
-const api = new DiscourseApi("https://discourse.example.con");
 
-api.options.api_username = "API_USERNAME";
-api.options.api_key = "API_KEY";
+const api = new DiscourseApi("https://discourse.example.com");
 
-api.chat.sendMessage(1, "hello, world!");
+const generated = api.generateUserApiKeySync();
+
+console.log(
+  "Please visit the following URL authorization and paste the generated key in the console:",
+);
+console.log(generated.url);
+
+const readline = require("readline").createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+readline.question(`Paste key: `, (key) => {
+  const decrypted = api.decryptUserApiKey(generated.private_key, key);
+  console.log(decrypted);
+
+  api.options.user_api_key = decrypted.key;
+
+  api.createTopicPostPM({
+    raw: "This is a post from node-discourse-api!!!",
+    title: "Hello world!!!",
+  });
+
+  readline.close();
+});
 ```
 
 For more examples, see the [API documentation](https://lhcfl.github.io/node-discourse-api/)
