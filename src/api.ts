@@ -1,5 +1,5 @@
 import EventEmitter from "eventemitter3";
-import { Post } from "@/types/discourse";
+import { Post, Topic } from "@/types/discourse";
 import fetch, { HeadersInit } from "node-fetch-commonjs";
 import { ChatApi } from "@/lib/chat";
 import crypto from "node:crypto";
@@ -373,6 +373,65 @@ class DiscourseApi extends EventEmitter {
     latest_posts: Post[];
   }> {
     return this._request("/posts");
+  }
+
+  /**
+   * Get information on a specified topic
+   * @param topic_id
+   * @param config
+   * @returns
+   */
+  getTopicInfo(
+    topic_id: number | string,
+    config?: {
+      arround_post_number: number | "last";
+    },
+  ): Promise<Topic> {
+    if (config?.arround_post_number) {
+      return this._request(`/t/-/${topic_id}/${config?.arround_post_number}`);
+    } else {
+      return this._request(`/t/${topic_id}`);
+    }
+  }
+
+  /**
+   * Get posts by post_id on a specified topic
+   * @param topic_id
+   * @param post_ids
+   * @returns
+   */
+  getTopicPosts(
+    topic_id: number | string,
+    post_ids: Array<number | string>,
+  ): Promise<{
+    id: number;
+    post_stream: Post[];
+  }> {
+    const urlParams = new URLSearchParams();
+    for (const pid of post_ids) {
+      urlParams.append("post_ids[]", pid.toString());
+    }
+    return this._request(`/t/${topic_id}/posts?${urlParams.toString()}`);
+  }
+
+  /**
+   * Get the raw of the specified post
+   * @param post_id
+   * @returns
+   */
+  getPostRaw(post_id: number | string): Promise<string> {
+    return this._request(`/posts/${post_id}/raw`);
+  }
+
+  /**
+   * Get *only* the cooked of the specified post
+   * @param post_id
+   * @returns
+   */
+  getPostCooked(post_id: number | string): Promise<{
+    cooked: string;
+  }> {
+    return this._request(`/posts/${post_id}/cooked`);
   }
 
   /**
