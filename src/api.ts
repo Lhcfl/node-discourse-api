@@ -1,5 +1,5 @@
 import EventEmitter from "eventemitter3";
-import { Discourse } from "@/types/discourse";
+import { Post } from "@/types/discourse";
 import fetch, { HeadersInit } from "node-fetch-commonjs";
 import { ChatApi } from "@/lib/chat";
 import crypto from "node:crypto";
@@ -355,7 +355,7 @@ class DiscourseApi extends EventEmitter {
    * See https://docs.discourse.org/#tag/Posts/operation/listPosts
    */
   listPosts(): Promise<{
-    latest_posts: Discourse.Post[];
+    latest_posts: Post[];
   }> {
     return this._request("/posts");
   }
@@ -407,7 +407,7 @@ class DiscourseApi extends EventEmitter {
      * Provide an external_id from a remote system to associate a forum topic with that id.
      */
     external_id?: string;
-  }): Promise<Discourse.Post> {
+  }): Promise<Post> {
     return this._request("/posts", "POST", payloads);
   }
 
@@ -419,7 +419,7 @@ class DiscourseApi extends EventEmitter {
    * https://docs.discourse.org/#tag/Posts/operation/getPost
    * @param id
    */
-  getPost(id: number | string): Promise<Discourse.Post> {
+  getPost(id: number | string): Promise<Post> {
     return this._request(`/posts/${id}`);
   }
 
@@ -437,7 +437,7 @@ class DiscourseApi extends EventEmitter {
       raw: string;
       edit_reason?: string;
     },
-  ): Promise<Discourse.Post> {
+  ): Promise<Post> {
     return this._request(`/posts/${id}`, "PUT", post);
   }
 
@@ -462,7 +462,7 @@ class DiscourseApi extends EventEmitter {
    * https://docs.discourse.org/#tag/Posts/operation/postReplies
    * @param id Post id
    */
-  getPostReplies(id: number | string): Promise<Discourse.Post[]> {
+  getPostReplies(id: number | string): Promise<Post[]> {
     return this._request(`/posts/${id}`);
   }
 }
