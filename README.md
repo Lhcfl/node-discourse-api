@@ -39,7 +39,9 @@ api.createTopicPostPM({
 #### Send a message in channel
 
 ```javascript
-const { DiscourseApi } = require("node-discourse-api");
+const DiscourseApi = require("node-discourse-api");
+// Or you can also use the old method
+// const { DiscourseApi } = require("node-discourse-api");
 
 const api = new DiscourseApi("https://discourse.example.con");
 

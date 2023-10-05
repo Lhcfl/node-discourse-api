@@ -1,1 +1,1 @@
-module.exports = require("./lib/discourse.js");
+module.exports = require("./lib/api.js");

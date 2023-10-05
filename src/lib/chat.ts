@@ -1,4 +1,4 @@
-import { DiscourseApi } from "@/discourse";
+import { DiscourseApi } from "@/api";
 import { Discourse } from "@/types/discourse";
 
 export type ChatMessageOptions = {

@@ -1,4 +1,4 @@
-import { DiscourseApi } from "@/discourse";
+import { DiscourseApi } from "@/api";
 
 import express, { Response } from "express";
 import bodyParser from "body-parser";
