@@ -14,6 +14,7 @@
     "pretty:fix": "prettier -w .",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --fix --ext .ts,.js",
+    "git:commit": "yarn pretty:fix && yarn lint && git add . && git commit",
     "doc:generate": "typedoc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

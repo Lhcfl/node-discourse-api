@@ -71,22 +71,37 @@ export class DiscourseApiOption {
 }
 
 class DiscourseApi extends EventEmitter {
+  private _chat: ChatApi;
+  private _options: DiscourseApiOption;
+  private _webhook: WebhookReceptor;
   /**
    * The URL of discourse site
    */
   url: string;
+
   /**
-   * The discourse's options
+   * The discourse api's options
    */
-  options: DiscourseApiOption;
+  get options() {
+    return this._options;
+  }
+  set options(newOpt: ApiOptions) {
+    this._options = new DiscourseApiOption(this, newOpt);
+  }
+
   /**
    * Chat Api
    */
-  chat: ChatApi;
+  get chat() {
+    return this._chat;
+  }
+
   /**
    * Webhook receptor
    */
-  webhook: WebhookReceptor;
+  get webhook() {
+    return this._webhook;
+  }
 
   /**
    * Create a api client
@@ -96,9 +111,9 @@ class DiscourseApi extends EventEmitter {
   constructor(url: string, options?: ApiOptions) {
     super();
     this.url = url;
-    this.options = new DiscourseApiOption(this, options);
-    this.chat = new ChatApi(this);
-    this.webhook = new WebhookReceptor(this);
+    this._options = new DiscourseApiOption(this, options);
+    this._chat = new ChatApi(this);
+    this._webhook = new WebhookReceptor(this);
   }
 
   /**
