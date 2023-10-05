@@ -1,5 +1,5 @@
 import { DiscourseApi } from "@/discourse";
-import { Uploads } from "@/types/discourse";
+import { Discourse } from "@/types/discourse";
 
 export type ChatMessageOptions = {
   /**
@@ -9,7 +9,7 @@ export type ChatMessageOptions = {
   /**
    * An array of uploads_ids
    */
-  uploads?: Uploads[] | { id: number }[];
+  uploads?: Discourse.Uploads[] | { id: number }[];
 };
 
 export class ChatApi {
