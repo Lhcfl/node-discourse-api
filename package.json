@@ -2,9 +2,9 @@
   "name": "node-discourse-api",
   "version": "0.0.5",
   "description": "A node api for discourse",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "./lib/index.d.ts",
   "files": [
-    "index.js",
     "lib/**/*"
   ],
   "scripts": {
