@@ -156,7 +156,7 @@ export interface SuggestedTopic {
 /**
  * Topic
  */
-export interface Topic {
+export interface Topic extends BasicTopic {
   post_stream: {
     posts: Post[];
     stream: number[];
@@ -269,4 +269,12 @@ export interface BasicUser {
   username: string;
   name: string | null;
   avatar_template: string;
+}
+
+export interface BasicTopic {
+  id: number;
+  title: string;
+  fancy_title: string;
+  slug: string;
+  posts_count: number;
 }

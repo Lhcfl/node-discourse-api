@@ -1,5 +1,11 @@
 import EventEmitter from "eventemitter3";
-import { BasicUser, Post, SuggestedTopic, Topic } from "@/types/discourse";
+import {
+  BasicTopic,
+  BasicUser,
+  Post,
+  SuggestedTopic,
+  Topic,
+} from "@/types/discourse";
 import fetch, { HeadersInit } from "node-fetch-commonjs";
 import { ChatApi } from "@/lib/chat";
 import crypto from "node:crypto";
@@ -377,6 +383,14 @@ class DiscourseApi extends EventEmitter {
 
   /**
    * Get the latest topics
+   * @alias listLatest
+   */
+  get getLatest() {
+    return this.listLatest;
+  }
+
+  /**
+   * Get the latest topics
    * @param options
    * @returns
    */
@@ -439,7 +453,7 @@ class DiscourseApi extends EventEmitter {
   /**
    * Get information on a specified topic
    * @param topic_id
-   * @param config
+   * @param config.arround_post_number
    * @returns
    */
   getTopicInfo(
@@ -599,6 +613,254 @@ class DiscourseApi extends EventEmitter {
    */
   getPostReplies(id: number | string): Promise<Post[]> {
     return this._request(`/posts/${id}`);
+  }
+
+  /**
+   * Perform a post action, like a post and other actions
+   *
+   * https://docs.discourse.org/#tag/Posts/operation/performPostAction
+   * @param post_id
+   * @param post_action_type_id The post action type. See https://github.com/discourse/discourse/blob/main/app/models/post_action_type.rb
+   * - `2` - like
+   * - `3` - off_topic
+   * - `4` - inappropriate
+   * - `6` - notify_user
+   * - `7` - notify_moderators
+   * - `8` - spam
+   * @returns The updated post
+   */
+  performPostAction(
+    post_id: number | string,
+    post_action_type_id: number,
+    flag_topic?: boolean,
+  ): Promise<Post> {
+    return this._request("/post_actions", "POST", {
+      id: post_id,
+      post_action_type_id,
+      flag_topic,
+    });
+  }
+
+  /**
+   * Like a post
+   * @param post_id
+   * @returns The updated post
+   */
+  likePost(post_id: number | string): Promise<Post> {
+    return this.performPostAction(post_id, 2);
+  }
+
+  /**
+   * Delete a post action, unlike a post and other actions
+   *
+   * https://docs.discourse.org/#tag/Posts/operation/performPostAction
+   * @param post_id
+   * @param post_action_type_id The post action type. See https://github.com/discourse/discourse/blob/main/app/models/post_action_type.rb
+   */
+  deletePostAction(
+    post_id: number | string,
+    post_action_type_id: number,
+  ): Promise<Post> {
+    return this._request(
+      `/post_actions/${post_id}?post_action_type_id=${post_action_type_id}`,
+      "DELETE",
+    );
+  }
+
+  /**
+   * Unlike a post
+   * @param post_id
+   * @returns The updated post
+   */
+  unlikePost(post_id: number | string): Promise<Post> {
+    return this.deletePostAction(post_id, 2);
+  }
+
+  /**
+   * Lock a post from being edited. You should provide an api that has moderator premission.
+   *
+   * See https://docs.discourse.org/#tag/Posts/operation/lockPost
+   * @param post_id
+   * @returns The updated post
+   */
+  lockPost(post_id: number | string): Promise<Post> {
+    return this._request(`/posts/${post_id}/locked`, "PUT", {
+      locked: true,
+    });
+  }
+
+  /**
+   * Unlokc a post that was locked from being edited. You should provide an api that has moderator premission.
+   *
+   * See https://docs.discourse.org/#tag/Posts/operation/lockPost
+   * @param post_id
+   * @returns The updated post
+   */
+  unlockPost(post_id: number | string): Promise<Post> {
+    return this._request(`/posts/${post_id}/locked`, "PUT", {
+      locked: false,
+    });
+  }
+
+  /**
+   * Remove a topic
+   *
+   * https://docs.discourse.org/#tag/Topics/operation/removeTopic
+   * @param topic_id
+   * @returns
+   */
+  removeTopic(topic_id: number) {
+    return this._request(`/t/${topic_id}`, "DELETE");
+  }
+
+  /**
+   * Update a topic
+   *
+   * https://docs.discourse.org/#tag/Topics/operation/updateTopic
+   * @param topic_id
+   * @param topic
+   * @returns Topic updated
+   */
+  updateTopic(
+    topic_id: number,
+    topic: {
+      title?: string;
+      category_id?: number;
+    },
+  ): Promise<BasicTopic> {
+    return this._request(`/t/-/${topic_id}`, "PUT", {
+      topic,
+    });
+  }
+
+  /**
+   * Invite to topic
+   *
+   * https://docs.discourse.org/#tag/Topics/operation/inviteToTopic
+   * @param topic_id
+   * @param data
+   * @returns Topic updated
+   */
+  inviteToTopic(
+    topic_id: number,
+    data: {
+      user?: string;
+      email?: string;
+    },
+  ): Promise<{
+    user: BasicUser;
+  }> {
+    return this._request(`/t/${topic_id}/invite`, "POST", data);
+  }
+
+  /**
+   * Update the status of a topic.
+   *
+   * https://docs.discourse.org/#tag/Topics/operation/updateTopicStatus
+   *
+   * @param id Topic id
+   * @param status Status
+   * @param enabled Enabled
+   * @param until Until. Only required for `pinned` and `pinned_globally`
+   * @returns
+   */
+  updateTopicStatus(
+    id: number,
+    status: "closed" | "pinned" | "pinned_globally" | "archived" | "visible",
+    enabled: boolean,
+    until?: string | Date,
+  ): Promise<{
+    success: string;
+    topic_status_update?: string | null;
+  }> {
+    return this._request(`/t/${id}/status`, "PUT", {
+      status,
+      enabled,
+      until,
+    });
+  }
+
+  /**
+   * Close a topic
+   * @param id Topic id
+   * @param until
+   * @returns
+   */
+  closeTopic(id: number, until?: string | Date) {
+    return this.updateTopicStatus(id, "closed", true, until);
+  }
+  /**
+   * Open a topic
+   * @param id Topic id
+   * @param until
+   * @returns
+   */
+  openTopic(id: number) {
+    return this.updateTopicStatus(id, "closed", false);
+  }
+  /**
+   * Archive a topic
+   * @param id Topic id
+   * @param until
+   * @returns
+   */
+  archiveTopic(id: number, until?: string | Date) {
+    return this.updateTopicStatus(id, "archived", true, until);
+  }
+  /**
+   * Unarchive a topic
+   * @param id Topic id
+   * @param until
+   * @returns
+   */
+  unarchiveTopic(id: number) {
+    return this.updateTopicStatus(id, "archived", false);
+  }
+  /**
+   * Pin a topic
+   * @param id Topic id
+   * @param globally
+   * @param until
+   * @returns
+   */
+  pinTopic(id: number, globally: boolean, until: string | Date) {
+    if (globally) {
+      return this.updateTopicStatus(id, "pinned_globally", true, until);
+    } else {
+      return this.updateTopicStatus(id, "pinned", true, until);
+    }
+  }
+  /**
+   * Unpin a topic
+   * @param id Topic id
+   * @param globally
+   * @param until
+   * @returns
+   */
+  unpinTopic(id: number, globally: boolean) {
+    if (globally) {
+      return this.updateTopicStatus(id, "pinned_globally", false);
+    } else {
+      return this.updateTopicStatus(id, "pinned", false);
+    }
+  }
+  /**
+   * Unlist a topic
+   * @param id Topic id
+   * @param until
+   * @returns
+   */
+  unlistTopic(id: number, until?: string | Date) {
+    return this.updateTopicStatus(id, "visible", false, until);
+  }
+  /**
+   * Unlist a topic
+   * @param id Topic id
+   * @param until
+   * @returns
+   */
+  listTopic(id: number) {
+    return this.updateTopicStatus(id, "visible", true);
   }
 }
 
