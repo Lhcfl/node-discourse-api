@@ -2,9 +2,8 @@ import { DiscourseApi } from "@/api";
 import express, { Response } from "express";
 import bodyParser from "body-parser";
 import EventEmitter from "eventemitter3";
-import { Uploads } from "@/types/discourse";
-import { BaseChatMessage } from "./chat";
-
+import { BasicUser, Uploads } from "@/types/discourse";
+import { BasicChatMessage } from "./chat";
 
 export type WebhookCallbackFunction<T> = (
   body: T,
@@ -18,11 +17,11 @@ export type WebhookCallbackFunction<T> = (
  * @todo More event names are waiting to be added
  */
 export interface WebhookEvents {
-  "post": WebhookCallbackFunction<WebhookPost>;
-  "chat_message": WebhookCallbackFunction<WebhookChatMessage>
-  "default": WebhookCallbackFunction<any>;
-  "all": WebhookCallbackFunction<any>;
-  "ping": WebhookCallbackFunction<any>;
+  post: WebhookCallbackFunction<WebhookPost>;
+  chat_message: WebhookCallbackFunction<WebhookChatMessage>;
+  default: WebhookCallbackFunction<any>;
+  all: WebhookCallbackFunction<any>;
+  ping: WebhookCallbackFunction<any>;
   [key: string | symbol]: WebhookCallbackFunction<any>;
 }
 
@@ -110,7 +109,6 @@ export class WebhookReceptor extends EventEmitter {
     });
   }
 
-
   /**
    * It is triggered when discourse sends an webhook event.
    *
@@ -130,13 +128,9 @@ export class WebhookReceptor extends EventEmitter {
    * @param eventName
    * @param callback
    */
-  on<T extends keyof WebhookEvents> (
-    eventName: T,
-    callback: WebhookEvents[T]
-  ) {
+  on<T extends keyof WebhookEvents>(eventName: T, callback: WebhookEvents[T]) {
     return super.on(eventName.toString(), callback);
   }
-  
 }
 
 export interface WebhookPost {
@@ -197,6 +191,8 @@ export interface WebhookChatMessage {
     created_at: string;
     excerpt: string;
     chat_channel_id: string;
+    deleted_at?: string;
+    deleted_by_id?: number;
     mentioned_users: unknown[];
     available_flags: unknown[];
     user: {
@@ -209,9 +205,23 @@ export interface WebhookChatMessage {
       staff: boolean;
       new_user: boolean;
       primary_group_name?: string;
+      status?: {
+        description: string;
+        emoji: string;
+        ends_at: null | string;
+        message_bus_last_id?: number;
+      };
     };
     chat_webhook_event: null | unknown;
     uploads: Uploads[];
+    edited?: boolean;
+    in_reply_to?: {
+      id: number;
+      cooked: string;
+      excerpt: string;
+      user: BasicUser;
+      chat_webhook_event: null | unknown;
+    };
   };
   channel: {
     id: number;
@@ -264,6 +274,6 @@ export interface WebhookChatMessage {
     current_user_membership: unknown;
     meta: unknown;
     threading_enabled: false;
-    last_message: BaseChatMessage;
+    last_message: BasicChatMessage;
   };
 }
