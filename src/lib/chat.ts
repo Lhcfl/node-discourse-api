@@ -107,3 +107,15 @@ export class ChatApi {
     );
   }
 }
+
+export interface BaseChatMessage {
+  id: number;
+  message: string;
+  cooked: string;
+  created_at: string;
+  excerpt: string;
+  deleted_at: null | string;
+  deleted_by_id: null | number;
+  thread_id: null | number;
+  chat_channel_id: number;
+}
