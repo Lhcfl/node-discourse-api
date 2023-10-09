@@ -148,7 +148,7 @@ class DiscourseApi extends EventEmitter {
    * send request easily
    * @param endpoint the endpoint. if the endpoint not starts with '/', we consider it as a url
    * @param method method. defaltly 'GET'
-   * @param data request payload
+   * @param data for "POST" and "PUT": request payload
    * @returns Promise
    */
   _request(
@@ -197,33 +197,37 @@ class DiscourseApi extends EventEmitter {
         method,
         body: data,
         headers,
-      }).then((res) => {
-        if (res.ok) {
-          res.text().then((str) => {
-            try {
-              resolve(JSON.parse(str));
-            } catch (err) {
-              resolve(str);
-            }
-          });
-        } else {
-          res.text().then((str) => {
-            try {
-              reject({
-                status: res.status,
-                statusText: res.statusText,
-                body: JSON.parse(str),
-              });
-            } catch (err) {
-              reject({
-                status: res.status,
-                statusText: res.statusText,
-                body: str,
-              });
-            }
-          });
-        }
-      });
+      })
+        .then((res) => {
+          if (res.ok) {
+            res.text().then((str) => {
+              try {
+                resolve(JSON.parse(str));
+              } catch (err) {
+                resolve(str);
+              }
+            });
+          } else {
+            res.text().then((str) => {
+              try {
+                reject({
+                  status: res.status,
+                  statusText: res.statusText,
+                  body: JSON.parse(str),
+                });
+              } catch (err) {
+                reject({
+                  status: res.status,
+                  statusText: res.statusText,
+                  body: str,
+                });
+              }
+            });
+          }
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
 
