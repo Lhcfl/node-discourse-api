@@ -395,6 +395,10 @@ class DiscourseApi extends EventEmitter {
    * @returns
    */
   listLatest(options?: {
+    /**
+     * You can usually provide `more_topics_url`
+     * If you provide this value, you cannot provide other options
+     */
     custom_url?: string;
     order?:
       | "default"
@@ -443,7 +447,7 @@ class DiscourseApi extends EventEmitter {
       urlParams.append("order", String(options.status));
     }
     const queryUrl = options?.custom_url || "/latest";
-    if (urlParams.toString()) {
+    if (!options?.custom_url && urlParams.toString()) {
       return this._request(`${queryUrl}?${urlParams.toString()}`);
     } else {
       return this._request(queryUrl);

@@ -65,33 +65,30 @@ export class WebhookReceptor extends EventEmitter {
    * @param method
    */
   registWebhookPath(
-    path: string,
-    method: "POST" | "GET" | "PUT" | "DELETE" = "POST"
+    path: string
   ) {
-    if (method == "POST") {
-      this.app.post(path, (req, res) => {
-        try {
-          const query = req.body;
-          for (const hook in query) {
-            this.emit("all", query, res);
-            if (this.listenerCount(hook) > 0) {
-              this.emit(hook, query[hook], res);
-            } else {
-              this.emit("default", query, res);
-            }
-          }
-        } catch (err) {
-          console.log("-------ERROR IN WEBHOOK-------");
-          console.error(err);
-          console.log("-------ERROR IN WEBHOOK-------");
-          if (err instanceof Error) {
-            res.status(500).json({ text: "500 error", details: err.message });
+    this.app.post(path, (req, res) => {
+      try {
+        const query = req.body;
+        for (const hook in query) {
+          this.emit("all", query, res);
+          if (this.listenerCount(hook) > 0) {
+            this.emit(hook, query[hook], res);
           } else {
-            res.status(500).json({ text: "500 error", details: err });
+            this.emit("default", query, res);
           }
         }
-      });
-    }
+      } catch (err) {
+        console.log("-------ERROR IN WEBHOOK-------");
+        console.error(err);
+        console.log("-------ERROR IN WEBHOOK-------");
+        if (err instanceof Error) {
+          res.status(500).json({ text: "500 error", details: err.message });
+        } else {
+          res.status(500).json({ text: "500 error", details: err });
+        }
+      }
+    });
   }
 
   /**
