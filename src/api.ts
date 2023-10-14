@@ -488,7 +488,9 @@ class DiscourseApi extends EventEmitter {
     post_ids: Array<number | string>,
   ): Promise<{
     id: number;
-    post_stream: Post[];
+    post_stream: {
+      posts: Post[];
+    }
   }> {
     const urlParams = new URLSearchParams();
     for (const pid of post_ids) {
