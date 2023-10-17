@@ -40,9 +40,9 @@ export interface Uploads {
   extension: string;
   short_url: string;
   short_path: string;
+  retain_hours: number | null;
   human_filesize: string;
-  dominant_color?: string;
-  retain_hours?: number | null;
+  dominant_color?: string | null;
 }
 
 /**

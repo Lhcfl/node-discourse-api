@@ -5,11 +5,22 @@ import {
   Post,
   SuggestedTopic,
   Topic,
+  Uploads,
 } from "@/types/discourse";
-import fetch, { HeadersInit } from "node-fetch-commonjs";
+import axios from "axios";
 import { ChatApi } from "@/lib/chat";
 import crypto from "node:crypto";
 import { WebhookReceptor } from "./lib/webhook";
+import fs from "fs";
+import { AxiosError } from "axios";
+
+export class DiscoureError extends Error {
+  constructor(errobj: unknown) {
+    super();
+    this.name = "DiscouseError";
+    Object.assign(this, errobj);
+  }
+}
 
 export class DiscourseApiOption {
   private _storage: ApiOptions;
@@ -109,6 +120,10 @@ class DiscourseApi extends EventEmitter {
     return this._webhook;
   }
 
+  get _axios() {
+    return axios;
+  }
+
   /**
    * Create a api client
    * @param url The URL of your site. Don't add / at the end
@@ -125,10 +140,8 @@ class DiscourseApi extends EventEmitter {
   /**
    * Get default header
    */
-  get _defaultHeaders(): HeadersInit {
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
+  get _defaultHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {};
     if (this.options.api_key) {
       headers["Api-Key"] = this.options.api_key;
     }
@@ -148,86 +161,149 @@ class DiscourseApi extends EventEmitter {
    * send request easily
    * @param endpoint the endpoint. if the endpoint not starts with '/', we consider it as a url
    * @param method method. defaltly 'GET'
-   * @param data for "POST" and "PUT": request payload
+   * @param data for "POST" and "PUT": request payload. For "GET" and "DELETE": URLSearchParams
    * @returns Promise
    */
   _request(
     endpoint: string,
     method: "GET" | "POST" | "DELETE" | "PUT" = "GET",
-    data?: unknown,
+    data?: unknown | FormData | URLSearchParams,
     options?: {
       /**
        * When true, we will not automatically add the end of .json when fetching
        */
-      doNotSendJSON?: boolean;
+      doNotAddJSON?: boolean;
       /**
        * custom header
        */
-      headers?: HeadersInit;
+      headers?: Record<string, string>;
       /**
        * When true, the options.header will override the default headers. Otherwise, the request will use a header that is a combination of the two
        */
       overrideHeaders?: boolean;
+      /**
+       * URL Params
+       */
+      params?: unknown | URLSearchParams;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     return new Promise((resolve, reject) => {
-      if (data) {
-        data = JSON.stringify(data);
+      let headers: Record<string, string>;
+      if (!options) options = {};
+      if (options.overrideHeaders) {
+        headers = options.headers || {};
+      } else {
+        headers = Object.assign({}, this._defaultHeaders, options?.headers);
+      }
+      if (data instanceof URLSearchParams) {
+        options.params = data;
+        data = undefined;
+      } else if (data instanceof FormData) {
+        if (headers && "Content-Type" in headers) {
+          delete headers["Content-Type"];
+        }
       }
       if (endpoint.startsWith("/")) {
         const [p1, p2] = endpoint.split("?");
         let urlType = "";
-        if (!p1.endsWith(".json") && !options?.doNotSendJSON) {
+        if (!p1.endsWith(".json") && !options?.doNotAddJSON) {
           urlType = ".json";
         }
         if (p2) {
-          endpoint = `${this.url}${p1}${urlType}?${p2}`;
+          endpoint = `${p1}${urlType}?${p2}`;
         } else {
-          endpoint = `${this.url}${p1}${urlType}`;
+          endpoint = `${p1}${urlType}`;
         }
       }
-      let headers: HeadersInit | undefined;
-      if (options?.overrideHeaders) {
-        headers = options.headers;
-      } else {
-        headers = Object.assign({}, this._defaultHeaders, options?.headers);
-      }
-      fetch(endpoint, {
+      axios({
         method,
-        body: data,
         headers,
+        url: endpoint,
+        baseURL: this.url,
+        params: options?.params,
+        data,
       })
         .then((res) => {
-          if (res.ok) {
-            res.text().then((str) => {
-              try {
-                resolve(JSON.parse(str));
-              } catch (err) {
-                resolve(str);
-              }
-            });
-          } else {
-            res.text().then((str) => {
-              try {
-                reject({
-                  status: res.status,
-                  statusText: res.statusText,
-                  body: JSON.parse(str),
-                });
-              } catch (err) {
-                reject({
-                  status: res.status,
-                  statusText: res.statusText,
-                  body: str,
-                });
-              }
-            });
-          }
+          resolve(res.data);
         })
         .catch((err) => {
-          reject(err);
+          if (err instanceof AxiosError) {
+            const errorRes: {
+              code?: string;
+              axiosMessage: string;
+              message: string;
+              status?: number;
+              statusText?: string;
+              response?: typeof err.response;
+              body?: unknown;
+              axiosToJSON: typeof err.toJSON;
+            } = {
+              axiosMessage: err.message,
+              axiosToJSON: err.toJSON,
+              message: err.message,
+            };
+            if (err.code) errorRes.code = err.code;
+            if (err.response) {
+              errorRes.response = err.response;
+              errorRes.status = err.response.status;
+              errorRes.statusText = err.response.statusText;
+              errorRes.body = err.response.data;
+              if (
+                typeof err.response.data === "object" &&
+                "errors" in err.response.data
+              ) {
+                if (
+                  typeof err.response.data.errors === "object" &&
+                  typeof err.response.data.errors.join === "function"
+                ) {
+                  errorRes.message += ": " + err.response.data.errors.join(";");
+                } else {
+                  errorRes.message +=
+                    ": " + JSON.stringify(err.response.data.errors);
+                }
+              }
+            }
+            reject(new DiscoureError(errorRes));
+          } else {
+            reject(err);
+          }
         });
+      //   fetch(endpoint, {
+      //     method,
+      //     body: data,
+      //     headers,
+      //   })
+      //     .then((res) => {
+      //       if (res.ok) {
+      //         res.text().then((str) => {
+      //           try {
+      //             resolve(JSON.parse(str));
+      //           } catch (err) {
+      //             resolve(str);
+      //           }
+      //         });
+      //       } else {
+      //         res.text().then((str) => {
+      //           try {
+      //             reject({
+      //               status: res.status,
+      //               statusText: res.statusText,
+      //               body: JSON.parse(str),
+      //             });
+      //           } catch (err) {
+      //             reject({
+      //               status: res.status,
+      //               statusText: res.statusText,
+      //               body: str,
+      //             });
+      //           }
+      //         });
+      //       }
+      //     })
+      //     .catch((err) => {
+      //       reject(err);
+      //     });
     });
   }
 
@@ -490,7 +566,7 @@ class DiscourseApi extends EventEmitter {
     id: number;
     post_stream: {
       posts: Post[];
-    }
+    };
   }> {
     const urlParams = new URLSearchParams();
     for (const pid of post_ids) {
@@ -864,13 +940,74 @@ class DiscourseApi extends EventEmitter {
     return this.updateTopicStatus(id, "visible", false, until);
   }
   /**
-   * Unlist a topic
+   * list a topic
    * @param id Topic id
    * @param until
    * @returns
    */
   listTopic(id: number) {
     return this.updateTopicStatus(id, "visible", true);
+  }
+
+  /**
+   * Create a upload
+   * @param file File path or file buffer
+   * @param options
+   * @returns
+   * @see https://docs.discourse.org/#tag/Uploads/operation/createUpload
+   */
+  async createUpload(
+    file: fs.PathLike | Buffer,
+    options?:
+      | {
+          type?:
+            | "avatar"
+            | "profile_background"
+            | "card_background"
+            | "custom_emoji"
+            | "composer";
+          /**
+           * required if uploading an avatar
+           */
+          user_id?: number;
+          /**
+           * Use this flag to return an id and url
+           */
+          synchronous?: boolean;
+          /**
+           * used only if `file` is a filepath.
+           */
+          encoding?: BufferEncoding;
+          /**
+           * filename provided to discourse
+           */
+          filename?: string;
+        }
+      | FormData,
+  ): Promise<Uploads> {
+    let data = new FormData();
+    if (options instanceof FormData) {
+      data = options;
+    } else {
+      options = options || {};
+      if (file instanceof Buffer) {
+        data.append("file", new Blob([file]), options.filename);
+      } else {
+        data.append(
+          "file",
+          new Blob([
+            fs.readFileSync(file, {
+              encoding: options.encoding,
+            }),
+          ]),
+          options.filename || String(file).replace(/^.*[\\\/]/, ""),
+        );
+      }
+      data.append("type", options.type || "composer");
+      if (options.user_id) data.append("user_id", String(options.user_id));
+      data.append("synchronous", String(options.synchronous || true));
+    }
+    return this._request("/uploads", "POST", data);
   }
 }
 
