@@ -14,11 +14,57 @@ import { WebhookReceptor } from "./lib/webhook";
 import fs from "fs";
 import { AxiosError } from "axios";
 
-export class DiscoureError extends Error {
-  constructor(errobj: unknown) {
+export class DiscoureError extends Error implements DiscoureBaseError {
+  code?: string;
+  axiosMessage?: string;
+  message: string;
+  status: number;
+  statusText: string;
+  response?: AxiosError["response"];
+  request?: AxiosError["request"];
+  body: unknown;
+  axiosToJSON?: AxiosError["toJSON"];
+  constructor(errobj: DiscoureBaseError | AxiosError) {
     super();
     this.name = "DiscouseError";
-    Object.assign(this, errobj);
+    if (errobj instanceof AxiosError) {
+      if (!errobj.response) {
+        throw new Error(
+          "DiscourseError constructed from AxiosError must have a response",
+        );
+      }
+      this.axiosMessage = errobj.message;
+      this.axiosToJSON = errobj.toJSON;
+      this.message = errobj.message;
+      this.response = errobj.response;
+      this.status = errobj.response.status;
+      this.statusText = errobj.response.statusText;
+      this.body = errobj.response.data;
+      if (errobj.request) this.request = errobj.request;
+      if (errobj.code) this.code = errobj.code;
+      if (
+        errobj.response.data &&
+        typeof errobj.response.data === "object" &&
+        "errors" in errobj.response.data
+      ) {
+        if (
+          errobj.response.data.errors &&
+          typeof errobj.response.data.errors === "object" &&
+          "join" in errobj.response.data.errors &&
+          typeof errobj.response.data.errors.join === "function"
+        ) {
+          this.message += ": " + errobj.response.data.errors.join(";");
+        } else {
+          this.message += ": " + JSON.stringify(errobj.response.data.errors);
+        }
+      }
+    } else {
+      Object.assign(this, errobj);
+      this.name = "DiscouseError";
+      this.status = errobj.status;
+      this.message = errobj.message;
+      this.statusText = errobj.statusText;
+    }
   }
 }
 
@@ -120,6 +166,10 @@ class DiscourseApi extends EventEmitter {
     return this._webhook;
   }
 
+  /**
+   * Provide one `axios` to use
+   * @see {@link https://github.com/axios/axios}
+   */
   get _axios() {
     return axios;
   }
@@ -228,43 +278,8 @@ class DiscourseApi extends EventEmitter {
           resolve(res.data);
         })
         .catch((err) => {
-          if (err instanceof AxiosError) {
-            const errorRes: {
-              code?: string;
-              axiosMessage: string;
-              message: string;
-              status?: number;
-              statusText?: string;
-              response?: typeof err.response;
-              body?: unknown;
-              axiosToJSON: typeof err.toJSON;
-            } = {
-              axiosMessage: err.message,
-              axiosToJSON: err.toJSON,
-              message: err.message,
-            };
-            if (err.code) errorRes.code = err.code;
-            if (err.response) {
-              errorRes.response = err.response;
-              errorRes.status = err.response.status;
-              errorRes.statusText = err.response.statusText;
-              errorRes.body = err.response.data;
-              if (
-                typeof err.response.data === "object" &&
-                "errors" in err.response.data
-              ) {
-                if (
-                  typeof err.response.data.errors === "object" &&
-                  typeof err.response.data.errors.join === "function"
-                ) {
-                  errorRes.message += ": " + err.response.data.errors.join(";");
-                } else {
-                  errorRes.message +=
-                    ": " + JSON.stringify(err.response.data.errors);
-                }
-              }
-            }
-            reject(new DiscoureError(errorRes));
+          if (err instanceof AxiosError && err.response) {
+            reject(new DiscoureError(err));
           } else {
             reject(err);
           }
@@ -317,7 +332,7 @@ class DiscourseApi extends EventEmitter {
    * api.generateUserApiKeySync
    * ```
    *
-   * For more information, see https://meta.discourse.org/t/user-api-keys-specification/48536
+   * @see {@link https://meta.discourse.org/t/user-api-keys-specification/48536}
    *
    * @param params params
    * @returns
@@ -377,7 +392,7 @@ class DiscourseApi extends EventEmitter {
    *
    * It is the async version of `generateUserApiKeySync`.
    *
-   * For more information, see https://meta.discourse.org/t/user-api-keys-specification/48536
+   * @see {@link https://meta.discourse.org/t/user-api-keys-specification/48536}
    *
    * @param params params
    */
@@ -444,7 +459,7 @@ class DiscourseApi extends EventEmitter {
   /**
    * Get the info of site.
    *
-   * See https://docs.discourse.org/#tag/Site/operation/getSite
+   * @see {@link https://docs.discourse.org/#tag/Site/operation/getSite}
    */
   getSite() {
     return this._request("/site");
@@ -453,7 +468,7 @@ class DiscourseApi extends EventEmitter {
   /**
    * List latest posts across topics
    *
-   * See https://docs.discourse.org/#tag/Posts/operation/listPosts
+   * @see {@link https://docs.discourse.org/#tag/Posts/operation/listPosts}
    */
   listPosts(): Promise<{
     latest_posts: Post[];
@@ -462,11 +477,11 @@ class DiscourseApi extends EventEmitter {
   }
 
   /**
-   * Get the latest topics
-   * @alias listLatest
+   * Get the latest topics. It is an alias of `listLatest`
+   * @see {@link listLatest}
    */
-  get getLatest() {
-    return this.listLatest;
+  getLatest(...args: never[]) {
+    return this.listLatest(...args);
   }
 
   /**
@@ -535,14 +550,29 @@ class DiscourseApi extends EventEmitter {
   }
 
   /**
+   * Get information on a specified topic. It is a alias of `getTopic`
+   * @param topic_id
+   * @param args
+   * @returns
+   * @see {@link getTopic}
+   */
+  getTopicInfo(topic_id: number | string, ...args: never[]) {
+    return this.getTopic(topic_id, ...args);
+  }
+
+  /**
    * Get information on a specified topic
    * @param topic_id
    * @param config.arround_post_number
    * @returns
+   * @see {@link https://docs.discourse.org/#tag/Topics/operation/getTopic}
    */
-  getTopicInfo(
+  getTopic(
     topic_id: number | string,
     config?: {
+      /**
+       * Get the post stream near the post number
+       */
       arround_post_number?: number | "last";
     },
   ): Promise<Topic> {
@@ -598,7 +628,7 @@ class DiscourseApi extends EventEmitter {
   /**
    * Creates a new topic, a new post, or a private message
    *
-   * See https://docs.discourse.org/#tag/Posts/operation/createTopicPostPM
+   * @see {@link https://docs.discourse.org/#tag/Posts/operation/createTopicPostPM}
    * @param payloads payloads
    */
   createTopicPostPM(payloads: {
@@ -940,7 +970,7 @@ class DiscourseApi extends EventEmitter {
     return this.updateTopicStatus(id, "visible", false, until);
   }
   /**
-   * list a topic
+   * List a topic. (Make the topic visible again)
    * @param id Topic id
    * @param until
    * @returns
@@ -954,7 +984,7 @@ class DiscourseApi extends EventEmitter {
    * @param file File path or file buffer
    * @param options
    * @returns
-   * @see https://docs.discourse.org/#tag/Uploads/operation/createUpload
+   * @see {@link https://docs.discourse.org/#tag/Uploads/operation/createUpload}
    */
   async createUpload(
     file: fs.PathLike | Buffer,
@@ -1082,3 +1112,18 @@ export type generateUserApiKeyParams = {
    */
   public_key?: string;
 };
+
+export interface DiscoureBaseError {
+  /**
+   * Http status code
+   */
+  status: number;
+  /**
+   * Http status text
+   */
+  statusText: string;
+  /**
+   * error message
+   */
+  message: string;
+}

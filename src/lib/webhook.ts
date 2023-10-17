@@ -34,6 +34,7 @@ export class WebhookReceptor extends EventEmitter {
 
   /**
    * The express application used by webhook. You can use it to add unencapsulated custom operations
+   * @see {@link https://github.com/expressjs/express}
    */
   get app() {
     return this._app;

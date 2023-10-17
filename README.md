@@ -4,8 +4,8 @@
 
 This package is a **work in progress** and a large number of features are still under development. If you need to add functionality, please pull request to add a new method, or use `api._request` to request any API endpoint.
 
-![build status](https://github.com/Lhcfl/node-discourse-api/actions/workflows/build.yml/badge.svg)
-![doc status](https://github.com/Lhcfl/node-discourse-api/actions/workflows/tsdoc.yml/badge.svg)
+[![build status](https://github.com/Lhcfl/node-discourse-api/actions/workflows/build.yml/badge.svg)](https://www.npmjs.com/package/node-discourse-api)
+[![doc status](https://github.com/Lhcfl/node-discourse-api/actions/workflows/tsdoc.yml/badge.svg)](https://lhcfl.github.io/node-discourse-api/)
 ![lint status](https://github.com/Lhcfl/node-discourse-api/actions/workflows/lint_check.yml/badge.svg)
 
 [Home page](https://github.com/Lhcfl/node-discourse-api)
