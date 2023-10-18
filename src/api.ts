@@ -2,6 +2,7 @@ import EventEmitter from "eventemitter3";
 import {
   BasicTopic,
   BasicUser,
+  Notifications,
   Post,
   SuggestedTopic,
   Topic,
@@ -986,7 +987,7 @@ class DiscourseApi extends EventEmitter {
    * @returns
    * @see {@link https://docs.discourse.org/#tag/Uploads/operation/createUpload}
    */
-  async createUpload(
+  createUpload(
     file: fs.PathLike | Buffer,
     options?:
       | {
@@ -1038,6 +1039,27 @@ class DiscourseApi extends EventEmitter {
       data.append("synchronous", String(options.synchronous || true));
     }
     return this._request("/uploads", "POST", data);
+  }
+
+  /**
+   * Get notifications of a user
+   * @see {@link https://docs.discourse.org/#tag/Notifications/operation/getNotifications}
+   */
+  getNotifications(): Promise<Notifications> {
+    return this._request("/notifications");
+  }
+
+  /**
+   * Mark notifications as read
+   * @param id (optional) Leave off to mark all notifications as read
+   * @see {@link https://docs.discourse.org/#tag/Notifications/operation/markNotificationsAsRead}
+   */
+  markNotificationsAsRead(id?: number): Promise<{
+    success?: string;
+  }> {
+    return this._request("/notifications/mark-read", "PUT", {
+      id,
+    });
   }
 }
 

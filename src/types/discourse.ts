@@ -278,3 +278,30 @@ export interface BasicTopic {
   slug: string;
   posts_count: number;
 }
+
+export interface Notification {
+  id?: number;
+  user_id?: number;
+  notification_type?: number;
+  read?: boolean;
+  created_at?: string;
+  post_number?: string;
+  topic_id?: number;
+  slug?: string;
+  data?: {
+    badge_id?: number;
+    badge_name?: string;
+    badge_slug?: string;
+    badge_title?: boolean;
+    username?: string;
+  };
+}
+/**
+ * @see {@link https://docs.discourse.org/#tag/Notifications/operation/getNotifications}
+ */
+export interface Notifications {
+  notifications?: Notification[];
+  total_rows_notifications?: number;
+  seen_notification_id?: number;
+  load_more_notifications?: string;
+}
