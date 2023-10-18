@@ -12,6 +12,32 @@ This package is a **work in progress** and a large number of features are still 
 
 [API documentation](https://lhcfl.github.io/node-discourse-api/)
 
+## Development Progress
+
+❌: Not started yet  
+🟩: Work in progress  
+✅: Completed
+
+| API              | Progress |
+| ---------------- | -------- |
+| Backups          | ❌       |
+| Badges           | ❌       |
+| Categories       | ❌       |
+| Groups           | ❌       |
+| Invites          | ❌       |
+| Notifications    | ✅       |
+| Posts            | ✅       |
+| Topics           | 🟩       |
+| Private Messages | ❌       |
+| Search           | ❌       |
+| Site             | ✅       |
+| Tags             | ❌       |
+| Uploads          | 🟩       |
+| Users            | ❌       |
+| Admin            | ❌       |
+| Chat             | 🟩       |
+| Webhook          | 🟩       |
+
 ## How to use
 
 ### Installation
