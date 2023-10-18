@@ -287,7 +287,9 @@ export interface Notification {
   created_at?: string;
   post_number?: string;
   topic_id?: number;
+  fancy_title?: string;
   slug?: string;
+  high_priority?: boolean;
   data?: {
     badge_id?: number;
     badge_name?: string;
