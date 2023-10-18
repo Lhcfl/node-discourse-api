@@ -1043,10 +1043,11 @@ class DiscourseApi extends EventEmitter {
 
   /**
    * Get notifications of a user
+   * @param load_more_notifications more notifications url
    * @see {@link https://docs.discourse.org/#tag/Notifications/operation/getNotifications}
    */
-  getNotifications(): Promise<Notifications> {
-    return this._request("/notifications");
+  getNotifications(load_more_notifications?: string): Promise<Notifications> {
+    return this._request(load_more_notifications || "/notifications");
   }
 
   /**
