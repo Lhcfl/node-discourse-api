@@ -4,6 +4,8 @@
 
 This package is a **work in progress** and a large number of features are still under development. If you need to add functionality, please pull request to add a new method, or use `api._request` to request any API endpoint.
 
+**⚠️IMPORTANT**: Regarding version numbers, any version before releasing version 1.0.0 **SHOULD NOT** be considered a stable version and we **MAY change the API and cause incompatibilities**. When there is an incompatible API, we will increment the minor version. When a new API is covered, we will increment the patch version.
+
 [![build status](https://github.com/Lhcfl/node-discourse-api/actions/workflows/build.yml/badge.svg)](https://www.npmjs.com/package/node-discourse-api)
 [![doc status](https://github.com/Lhcfl/node-discourse-api/actions/workflows/tsdoc.yml/badge.svg)](https://lhcfl.github.io/node-discourse-api/)
 ![lint status](https://github.com/Lhcfl/node-discourse-api/actions/workflows/lint_check.yml/badge.svg)
