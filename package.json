@@ -1,6 +1,6 @@
 {
   "name": "node-discourse-api",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A node api for discourse",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
