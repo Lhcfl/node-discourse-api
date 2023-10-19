@@ -9,16 +9,18 @@
   ],
   "scripts": {
     "prepublishOnly": "tsc && tsc-alias",
-    "postpublishOnly": "git push origin main",
+    "postpublish": "git push origin main",
+    "devprepare": "husky install",
     "build": "tsc && tsc-alias",
     "pretty": "prettier -c .",
     "pretty:fix": "prettier -w .",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --fix --ext .ts,.js",
-    "git:commit": "yarn pretty:fix && yarn lint && git add . && git commit",
+    "autofix": "node .husky/auto-fix.js",
+    "git:commit": "git add . && git commit",
     "git:push": "yarn git:commit && git push origin main",
     "doc:generate": "typedoc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node .husky/tester.js full"
   },
   "repository": {
     "type": "git",

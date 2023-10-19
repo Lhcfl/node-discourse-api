@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+. "$(dirname -- "$0")/_/husky.sh"
+if which yarn >/dev/null; then
+    pack=yarn
+elif which pnpm >/dev/null; then
+    pack=pnpm
+else
+    pack=npm
+fi
+
+$pack exec node "$(dirname -- "$0")/tester.js" -f pre-commit

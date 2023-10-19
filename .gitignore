@@ -4,3 +4,6 @@ pnpm-lock.yaml
 lib/
 docs/
 .tsbuildinfo
+# 测试产物
+log/
+dev-log/
