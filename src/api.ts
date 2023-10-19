@@ -7,6 +7,7 @@ import {
   SuggestedTopic,
   Topic,
   Uploads,
+  UserInfo,
 } from "@/types/discourse";
 import axios from "axios";
 import { ChatApi } from "@/lib/chat";
@@ -1061,6 +1062,15 @@ class DiscourseApi extends EventEmitter {
     return this._request("/notifications/mark-read", "PUT", {
       id,
     });
+  }
+
+  /**
+   * Get a user by username
+   * @param username
+   * @returns info of user
+   */
+  getUser(username: string): Promise<UserInfo> {
+    return this._request(`/u/${username}`);
   }
 }
 

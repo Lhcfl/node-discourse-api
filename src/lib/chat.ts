@@ -9,7 +9,7 @@ export type ChatMessageOptions = {
   /**
    * An array of uploads_ids
    */
-  uploads?: Uploads[] | { id: number }[];
+  uploads?: Uploads[] | { id: number }[] | number[];
 };
 
 export class ChatApi {
@@ -27,8 +27,7 @@ export class ChatApi {
    * Send a message to channel
    * @param channelId The id of channel
    * @param message message raw text
-   * @todo Uploads is currently unavailable
-   * @param uploads if set, will bring uploads
+   * @param options message options
    * @returns
    */
   sendMessage(
@@ -41,7 +40,7 @@ export class ChatApi {
     };
     if (options?.uploads) {
       data.upload_ids = options.uploads.map((upload) => {
-        return upload.id;
+        return typeof upload === "number" ? upload : upload.id;
       });
     }
     if (options?.in_reply_to_id) {
@@ -55,7 +54,6 @@ export class ChatApi {
    * @param channelId The id of channel
    * @param messageId The id of message
    * @param message new message, raw text
-   * @param uploads if set, will bring uploads
    * @returns
    */
   editMessage(
@@ -69,7 +67,7 @@ export class ChatApi {
     };
     if (options?.uploads) {
       data.upload_ids = options.uploads.map((upload) => {
-        return upload.id;
+        return typeof upload === "number" ? upload : upload.id;
       });
     }
     if (options?.in_reply_to_id) {

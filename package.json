@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "prepublishOnly": "tsc && tsc-alias",
+    "postpublishOnly": "git push origin main",
     "build": "tsc && tsc-alias",
     "pretty": "prettier -c .",
     "pretty:fix": "prettier -w .",
