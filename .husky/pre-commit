@@ -8,4 +8,4 @@ else
     pack=npm
 fi
 
-$pack exec node "$(dirname -- "$0")/tester.js" -f pre-commit
+node "$(dirname -- "$0")/tester.js" -f pre-commit

@@ -127,5 +127,8 @@ if (process.argv) {
       });
     }
   }
+  if (Object.keys(cmdList).length === 0) {
+    console.log("nothing to test, are you serious?");
+  }
   tester(fast, Object.keys(cmdList), cmdList);
 }
