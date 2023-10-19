@@ -139,3 +139,30 @@ readline.question(`Paste key: `, (key) => {
 ```
 
 For more examples, see the [API documentation](https://lhcfl.github.io/node-discourse-api/)
+
+## Contribute to this project
+
+### Initialize
+
+We have set up some git hooks to help maintain code quality. If you would like to contribute to this project, please initialize in this order
+
+```
+git clone https://github.com/Lhcfl/node-discourse-api
+cd node-discourse-api
+yarn install
+yarn devprepare
+```
+
+### Test and autofix
+
+Test code:
+
+```
+yarn test
+```
+
+autofix:
+
+```
+yarn autofix
+```
