@@ -304,8 +304,6 @@ export interface UserInfo {
   user: User;
 }
 
-/* 自动生成的 Interface */
-
 /**
  * User
  */

@@ -35,7 +35,7 @@ This package is a **work in progress** and a large number of features are still 
 | Site             | ✅       |
 | Tags             | ❌       |
 | Uploads          | 🟩       |
-| Users            | ❌       |
+| Users            | 🟩       |
 | Admin            | ❌       |
 | Chat             | 🟩       |
 | Webhook          | 🟩       |
