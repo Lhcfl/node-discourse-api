@@ -1068,6 +1068,7 @@ class DiscourseApi extends EventEmitter {
    * Get a user by username
    * @param username
    * @returns info of user
+   * @see {@link https://docs.discourse.org/#tag/Users/operation/getUser}
    */
   getUser(username: string): Promise<UserInfo> {
     return this._request(`/u/${username}`);
