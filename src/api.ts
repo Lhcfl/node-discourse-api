@@ -521,7 +521,7 @@ class DiscourseApi extends EventEmitter {
       more_topics_url?: string;
       can_create_topic: boolean;
       per_page: number;
-      topics: SuggestedTopic;
+      topics: SuggestedTopic[];
     };
     flair_groups?: {
       id: number;
